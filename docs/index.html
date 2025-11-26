@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR + Emoji Generator</title>
+  <meta name="description" content="Create beautiful QR codes with your favorite emoji in the center. Free, fast, and open source.">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔳</text></svg>">
+
+  <!-- QRCode.js library -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-dark: #0a0a0f;
+      --violet-600: #7c3aed;
+      --violet-500: #8b5cf6;
+      --fuchsia-600: #c026d3;
+      --cyan-600: #0891b2;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg-dark);
+      color: white;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated background */
+    .bg-animation {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .bg-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    .bg-blob-1 {
+      top: -50%;
+      left: -50%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom right, rgba(124, 58, 237, 0.2), transparent);
+    }
+
+    .bg-blob-2 {
+      bottom: -50%;
+      right: -50%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to top left, rgba(8, 145, 178, 0.2), transparent);
+      animation-delay: 1s;
+    }
+
+    .bg-blob-3 {
+      top: 25%;
+      right: 25%;
+      width: 384px;
+      height: 384px;
+      background: linear-gradient(to bottom right, rgba(192, 38, 211, 0.1), transparent);
+      animation-delay: 2s;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Grid pattern */
+    .grid-pattern {
+      position: fixed;
+      inset: 0;
+      opacity: 0.02;
+      background-image:
+        linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+      z-index: 1;
+    }
+
+    /* Main container */
+    .container {
+      position: relative;
+      z-index: 10;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        padding: 3rem 1rem;
+      }
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(8px);
+      margin-bottom: 1.5rem;
+      font-size: 0.875rem;
+      color: #9ca3af;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, white, white, #6b7280);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    @media (min-width: 768px) {
+      h1 {
+        font-size: 4.5rem;
+      }
+    }
+
+    .subtitle {
+      font-size: 1.25rem;
+      color: #9ca3af;
+      max-width: 28rem;
+      margin: 0 auto;
+    }
+
+    /* Grid layout */
+    .main-grid {
+      display: grid;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (min-width: 1024px) {
+      .main-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(16px);
+      border-radius: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .card {
+        padding: 2rem;
+      }
+    }
+
+    .card + .card {
+      margin-top: 1.5rem;
+    }
+
+    .card-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+
+    /* URL Input */
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      color: #6b7280;
+    }
+
+    .url-input {
+      width: 100%;
+      padding: 1rem 1rem 1rem 3rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 1rem;
+      color: white;
+      font-size: 1.125rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .url-input::placeholder {
+      color: #6b7280;
+    }
+
+    .url-input:focus {
+      border-color: rgba(139, 92, 246, 0.5);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+
+    /* Emoji picker */
+    .emoji-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .selected-emoji {
+      font-size: 2.5rem;
+    }
+
+    /* Category tabs */
+    .category-tabs {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .category-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category-tab {
+      padding: 0.5rem 1rem;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      white-space: nowrap;
+      background: rgba(255,255,255,0.05);
+      color: #9ca3af;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .category-tab:hover {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    .category-tab.active {
+      background: var(--violet-600);
+      color: white;
+    }
+
+    /* Emoji grid */
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (min-width: 640px) {
+      .emoji-grid {
+        grid-template-columns: repeat(10, 1fr);
+      }
+    }
+
+    .emoji-btn {
+      aspect-ratio: 1;
+      font-size: 1.5rem;
+      border-radius: 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    @media (min-width: 640px) {
+      .emoji-btn {
+        font-size: 1.875rem;
+      }
+    }
+
+    .emoji-btn:hover {
+      transform: scale(1.1);
+      background: rgba(255,255,255,0.1);
+    }
+
+    .emoji-btn.selected {
+      background: rgba(124, 58, 237, 0.3);
+      box-shadow: 0 0 0 2px var(--violet-500);
+      transform: scale(1.1);
+    }
+
+    /* Custom emoji input */
+    .custom-emoji-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.75rem;
+      color: white;
+      font-size: 1.25rem;
+      text-align: center;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .custom-emoji-input::placeholder {
+      color: #6b7280;
+    }
+
+    .custom-emoji-input:focus {
+      border-color: rgba(139, 92, 246, 0.5);
+    }
+
+    /* Generate button */
+    .generate-btn-wrapper {
+      margin-top: 1.5rem;
+      position: relative;
+      border-radius: 1rem;
+      padding: 2px;
+      background: linear-gradient(90deg, var(--violet-600), var(--fuchsia-600), var(--cyan-600));
+      background-size: 200% 200%;
+      animation: gradient-x 3s ease infinite;
+    }
+
+    @keyframes gradient-x {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .generate-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 1.25rem 2rem;
+      background: var(--bg-dark);
+      border: none;
+      border-radius: calc(1rem - 2px);
+      color: white;
+      font-size: 1.125rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .generate-btn:hover {
+      background: transparent;
+    }
+
+    .generate-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .generate-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Spinner */
+    .spinner {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Error message */
+    .error-message {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem;
+      margin-top: 1rem;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 1rem;
+      color: #f87171;
+    }
+
+    .error-message svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    /* QR Preview */
+    .preview-column {
+      position: sticky;
+      top: 2rem;
+    }
+
+    .qr-display {
+      text-align: center;
+    }
+
+    .qr-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .qr-glow {
+      position: absolute;
+      inset: -1rem;
+      background: linear-gradient(90deg, rgba(124, 58, 237, 0.2), rgba(192, 38, 211, 0.2), rgba(8, 145, 178, 0.2));
+      border-radius: 1.5rem;
+      filter: blur(20px);
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+
+    .qr-wrapper:hover .qr-glow {
+      opacity: 1;
+    }
+
+    .qr-container {
+      position: relative;
+      background: white;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      display: inline-block;
+    }
+
+    #qr-result {
+      width: 256px;
+      height: 256px;
+      display: block;
+    }
+
+    @media (min-width: 640px) {
+      #qr-result {
+        width: 288px;
+        height: 288px;
+      }
+    }
+
+    /* Action buttons */
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem 1.5rem;
+      border-radius: 0.75rem;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .action-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .download-btn {
+      background: var(--violet-600);
+      color: white;
+    }
+
+    .download-btn:hover {
+      background: #6d28d9;
+    }
+
+    .copy-btn {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .copy-btn.copied {
+      color: #4ade80;
+    }
+
+    .info-text {
+      text-align: center;
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-top: 1.5rem;
+    }
+
+    /* Empty state */
+    .empty-state {
+      padding: 4rem 0;
+      text-align: center;
+    }
+
+    .empty-icon {
+      width: 128px;
+      height: 128px;
+      margin: 0 auto 1.5rem;
+      border-radius: 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px dashed rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-icon svg {
+      width: 48px;
+      height: 48px;
+      color: #4b5563;
+    }
+
+    .empty-title {
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: #9ca3af;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-subtitle {
+      color: #4b5563;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      font-size: 0.875rem;
+      color: #4b5563;
+    }
+
+    footer a {
+      color: #9ca3af;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Hidden */
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- Background animation -->
+  <div class="bg-animation">
+    <div class="bg-blob bg-blob-1"></div>
+    <div class="bg-blob bg-blob-2"></div>
+    <div class="bg-blob bg-blob-3"></div>
+  </div>
+  <div class="grid-pattern"></div>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="badge">
+        <span class="badge-dot"></span>
+        <span>Free & Open Source</span>
+      </div>
+      <h1>QR + Emoji</h1>
+      <p class="subtitle">Beautiful QR codes with your favorite emoji. Scannable, shareable, memorable.</p>
+    </header>
+
+    <div class="main-grid">
+      <!-- Left Column - Controls -->
+      <div class="controls-column">
+        <!-- URL Input Card -->
+        <div class="card">
+          <label class="card-label">Destination URL</label>
+          <div class="input-wrapper">
+            <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+            <input type="url" id="url-input" class="url-input" placeholder="https://your-awesome-link.com">
+          </div>
+        </div>
+
+        <!-- Emoji Picker Card -->
+        <div class="card">
+          <div class="emoji-header">
+            <span class="card-label">Choose Emoji</span>
+            <span class="selected-emoji" id="selected-emoji-display">🐍</span>
+          </div>
+
+          <!-- Category tabs -->
+          <div class="category-tabs" id="category-tabs"></div>
+
+          <!-- Emoji grid -->
+          <div class="emoji-grid" id="emoji-grid"></div>
+
+          <!-- Custom emoji input -->
+          <input type="text" id="custom-emoji" class="custom-emoji-input" placeholder="Or paste any emoji..." maxlength="2">
+        </div>
+
+        <!-- Generate Button -->
+        <div class="generate-btn-wrapper">
+          <button class="generate-btn" id="generate-btn">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+            </svg>
+            <span>Generate QR Code</span>
+          </button>
+        </div>
+
+        <!-- Error message -->
+        <div class="error-message hidden" id="error-message">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span id="error-text"></span>
+        </div>
+      </div>
+
+      <!-- Right Column - QR Preview -->
+      <div class="preview-column">
+        <div class="card">
+          <!-- Empty state -->
+          <div class="empty-state" id="empty-state">
+            <div class="empty-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+              </svg>
+            </div>
+            <h3 class="empty-title">Your QR code will appear here</h3>
+            <p class="empty-subtitle">Enter a URL and click generate</p>
+          </div>
+
+          <!-- QR Result -->
+          <div class="qr-display hidden" id="qr-display">
+            <div class="qr-wrapper">
+              <div class="qr-glow"></div>
+              <div class="qr-container">
+                <canvas id="qr-result"></canvas>
+              </div>
+            </div>
+
+            <div class="action-buttons">
+              <button class="action-btn download-btn" id="download-btn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download
+              </button>
+              <button class="action-btn copy-btn" id="copy-btn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <span>Copy</span>
+              </button>
+            </div>
+
+            <p class="info-text">High error correction ensures scannability</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>Built with vanilla JS. QR codes use H-level error correction. <a href="https://github.com/timapple/qr-emoji-generator" target="_blank">View on GitHub</a></p>
+    </footer>
+  </div>
+
+  <script>
+    // Emoji categories
+    const EMOJI_CATEGORIES = {
+      'Popular': ['🐍', '❤️', '⭐', '🔥', '✨', '🎉', '🚀', '💎', '🌟', '💯'],
+      'Faces': ['😀', '😍', '🥳', '😎', '🤩', '😊', '🥰', '😇', '🤗', '😏'],
+      'Animals': ['🦁', '🐶', '🐱', '🦊', '🐼', '🐨', '🦄', '🐸', '🦋', '🐝'],
+      'Food': ['🍕', '🍔', '🍟', '🌮', '🍣', '🍩', '🍪', '☕', '🍺', '🍷'],
+      'Activities': ['⚽', '🏀', '🎮', '🎯', '🎸', '🎨', '📸', '🎬', '🎤', '🎧'],
+      'Symbols': ['💪', '👑', '🏆', '✅', '💰', '🔑', '💡', '⚡', '🌈', '☀️'],
+    };
+
+    // State
+    let selectedEmoji = '🐍';
+    let activeCategory = 'Popular';
+    let qrGenerated = false;
+
+    // DOM Elements
+    const urlInput = document.getElementById('url-input');
+    const customEmojiInput = document.getElementById('custom-emoji');
+    const selectedEmojiDisplay = document.getElementById('selected-emoji-display');
+    const categoryTabs = document.getElementById('category-tabs');
+    const emojiGrid = document.getElementById('emoji-grid');
+    const generateBtn = document.getElementById('generate-btn');
+    const errorMessage = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
+    const emptyState = document.getElementById('empty-state');
+    const qrDisplay = document.getElementById('qr-display');
+    const qrCanvas = document.getElementById('qr-result');
+    const downloadBtn = document.getElementById('download-btn');
+    const copyBtn = document.getElementById('copy-btn');
+
+    // Initialize
+    function init() {
+      renderCategoryTabs();
+      renderEmojiGrid();
+      setupEventListeners();
+    }
+
+    // Render category tabs
+    function renderCategoryTabs() {
+      categoryTabs.innerHTML = Object.keys(EMOJI_CATEGORIES).map(category => `
+        <button class="category-tab ${category === activeCategory ? 'active' : ''}" data-category="${category}">
+          ${category}
+        </button>
+      `).join('');
+    }
+
+    // Render emoji grid
+    function renderEmojiGrid() {
+      const emojis = EMOJI_CATEGORIES[activeCategory];
+      emojiGrid.innerHTML = emojis.map(emoji => `
+        <button class="emoji-btn ${emoji === selectedEmoji ? 'selected' : ''}" data-emoji="${emoji}">
+          ${emoji}
+        </button>
+      `).join('');
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+      // Category tab clicks
+      categoryTabs.addEventListener('click', (e) => {
+        if (e.target.classList.contains('category-tab')) {
+          activeCategory = e.target.dataset.category;
+          renderCategoryTabs();
+          renderEmojiGrid();
+        }
+      });
+
+      // Emoji button clicks
+      emojiGrid.addEventListener('click', (e) => {
+        if (e.target.classList.contains('emoji-btn')) {
+          selectedEmoji = e.target.dataset.emoji;
+          customEmojiInput.value = '';
+          selectedEmojiDisplay.textContent = selectedEmoji;
+          renderEmojiGrid();
+        }
+      });
+
+      // Custom emoji input
+      customEmojiInput.addEventListener('input', (e) => {
+        if (e.target.value) {
+          selectedEmoji = e.target.value;
+          selectedEmojiDisplay.textContent = selectedEmoji;
+          renderEmojiGrid();
+        }
+      });
+
+      // Generate button
+      generateBtn.addEventListener('click', generateQR);
+
+      // Enter key on URL input
+      urlInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') generateQR();
+      });
+
+      // Download button
+      downloadBtn.addEventListener('click', downloadQR);
+
+      // Copy button
+      copyBtn.addEventListener('click', copyToClipboard);
+    }
+
+    // Show error
+    function showError(message) {
+      errorText.textContent = message;
+      errorMessage.classList.remove('hidden');
+    }
+
+    // Hide error
+    function hideError() {
+      errorMessage.classList.add('hidden');
+    }
+
+    // Generate QR code
+    async function generateQR() {
+      const url = urlInput.value.trim();
+
+      if (!url) {
+        showError('Please enter a URL');
+        return;
+      }
+
+      hideError();
+
+      // Show loading state
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = `
+        <svg class="spinner" fill="none" viewBox="0 0 24 24">
+          <circle style="opacity: 0.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path style="opacity: 0.75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>Generating...</span>
+      `;
+
+      try {
+        // Create temp canvas for QR code
+        const tempCanvas = document.createElement('canvas');
+
+        await QRCode.toCanvas(tempCanvas, url, {
+          errorCorrectionLevel: 'H',
+          margin: 2,
+          width: 400,
+          color: {
+            dark: '#000000',
+            light: '#ffffff',
+          },
+        });
+
+        // Draw to final canvas with emoji
+        const ctx = qrCanvas.getContext('2d');
+        const size = 400;
+        qrCanvas.width = size;
+        qrCanvas.height = size;
+
+        // Draw QR code
+        ctx.drawImage(tempCanvas, 0, 0, size, size);
+
+        // Draw white circle background
+        const centerX = size / 2;
+        const centerY = size / 2;
+        const emojiSize = size / 4;
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, emojiSize / 2 + 10, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+
+        // Draw emoji
+        ctx.font = `${emojiSize * 0.8}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(selectedEmoji, centerX, centerY);
+
+        // Show result
+        emptyState.classList.add('hidden');
+        qrDisplay.classList.remove('hidden');
+        qrGenerated = true;
+
+      } catch (err) {
+        showError('Failed to generate QR code. Please check the URL.');
+        console.error(err);
+      } finally {
+        // Reset button
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = `
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+          </svg>
+          <span>Generate QR Code</span>
+        `;
+      }
+    }
+
+    // Download QR code
+    function downloadQR() {
+      if (!qrGenerated) return;
+
+      const link = document.createElement('a');
+      link.download = `qr-${selectedEmoji}-${Date.now()}.png`;
+      link.href = qrCanvas.toDataURL('image/png');
+      link.click();
+    }
+
+    // Copy to clipboard
+    async function copyToClipboard() {
+      if (!qrGenerated) return;
+
+      try {
+        const blob = await new Promise(resolve => qrCanvas.toBlob(resolve, 'image/png'));
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+
+        // Show copied state
+        copyBtn.classList.add('copied');
+        copyBtn.innerHTML = `
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          <span>Copied!</span>
+        `;
+
+        setTimeout(() => {
+          copyBtn.classList.remove('copied');
+          copyBtn.innerHTML = `
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            <span>Copy</span>
+          `;
+        }, 2000);
+      } catch (err) {
+        // Fallback - copy data URL
+        await navigator.clipboard.writeText(qrCanvas.toDataURL('image/png'));
+        copyBtn.classList.add('copied');
+        copyBtn.querySelector('span').textContent = 'Copied!';
+        setTimeout(() => {
+          copyBtn.classList.remove('copied');
+          copyBtn.querySelector('span').textContent = 'Copy';
+        }, 2000);
+      }
+    }
+
+    // Initialize on load
+    init();
+  </script>
+</body>
+</html>
