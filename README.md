@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# QR + Emoji Generator
 
-## Getting Started
+Create beautiful QR codes with your favorite emoji in the center. Free, open source, and scannable.
 
-First, run the development server:
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+## Features
+
+- Generate QR codes with any emoji overlay
+- 60+ pre-selected emojis across 6 categories
+- Custom emoji input support
+- High error correction (H-level) ensures scannability
+- Download as PNG
+- Copy to clipboard
+- Modern dark UI with glassmorphism design
+- Fully responsive
+
+## Two Versions
+
+### 1. Static Version (GitHub Pages)
+Pure HTML/CSS/JS - no build step required.
+
+**Live Demo:** [https://atlascodes.github.io/qr-emoji-generator](https://atlascodes.github.io/qr-emoji-generator)
+
+Located in `/docs` folder. Deploy to any static hosting:
+- GitHub Pages
+- Netlify
+- Cloudflare Pages
+- Any web server
+
+### 2. Next.js Version (Vercel)
+Full Next.js app with server-side QR generation.
+
+Located in root folder. Deploy to Vercel:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev     # Development
+npm run build   # Production build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Static Version
+- Vanilla HTML/CSS/JavaScript
+- [qrcode.js](https://github.com/soldair/node-qrcode) via CDN (MIT License)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Next.js Version
+- [Next.js](https://nextjs.org/) (MIT License)
+- [qrcode](https://www.npmjs.com/package/qrcode) npm package (MIT License)
+- [Tailwind CSS](https://tailwindcss.com/) (MIT License)
 
-## Learn More
+## License
 
-To learn more about Next.js, take a look at the following resources:
+MIT License - see [LICENSE](LICENSE) file.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Third-Party Licenses
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This project uses the following open source libraries:
 
-## Deploy on Vercel
+| Library | License | URL |
+|---------|---------|-----|
+| qrcode | MIT | https://github.com/soldair/node-qrcode |
+| Next.js | MIT | https://github.com/vercel/next.js |
+| Tailwind CSS | MIT | https://github.com/tailwindlabs/tailwindcss |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Contributing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Contributions are welcome! Feel free to open issues or submit pull requests.
+
+## Acknowledgments
+
+Built with [Claude Code](https://claude.com/claude-code)
