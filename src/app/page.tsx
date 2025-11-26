@@ -138,7 +138,7 @@ export default function Home() {
         {/* Header */}
         <header className="text-center mb-12 md:mb-16">
           <a
-            href="https://github.com/AtlasCodes/qremoji.cc"
+            href="https://github.com/atlascodesai/qremoji.cc"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm mb-6 hover:bg-white/10 transition-colors"
