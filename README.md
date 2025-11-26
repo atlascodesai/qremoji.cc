@@ -4,6 +4,11 @@ Create beautiful QR codes with your favorite emoji in the center. Free, open sou
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+## Live Sites
+
+- **Main:** [qremoji.cc](https://qremoji.cc) (Vercel)
+- **Static:** [gh.qremoji.cc](https://gh.qremoji.cc) (GitHub Pages)
+
 ## Features
 
 - Generate QR codes with any emoji overlay
@@ -19,8 +24,6 @@ Create beautiful QR codes with your favorite emoji in the center. Free, open sou
 
 ### 1. Static Version (GitHub Pages)
 Pure HTML/CSS/JS - no build step required.
-
-**Live Demo:** [https://atlascodes.github.io/qr-emoji-generator](https://atlascodes.github.io/qr-emoji-generator)
 
 Located in `/docs` folder. Deploy to any static hosting:
 - GitHub Pages
@@ -42,7 +45,7 @@ npm run build   # Production build
 
 ### Static Version
 - Vanilla HTML/CSS/JavaScript
-- [qrcode.js](https://github.com/soldair/node-qrcode) via CDN (MIT License)
+- [qrcodejs](https://github.com/davidshimjs/qrcodejs) via CDN (MIT License)
 
 ### Next.js Version
 - [Next.js](https://nextjs.org/) (MIT License)
@@ -59,6 +62,7 @@ This project uses the following open source libraries:
 
 | Library | License | URL |
 |---------|---------|-----|
+| qrcodejs | MIT | https://github.com/davidshimjs/qrcodejs |
 | qrcode | MIT | https://github.com/soldair/node-qrcode |
 | Next.js | MIT | https://github.com/vercel/next.js |
 | Tailwind CSS | MIT | https://github.com/tailwindlabs/tailwindcss |
