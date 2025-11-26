@@ -8,8 +8,8 @@
   <meta name="theme-color" content="#0a0a0f">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔳</text></svg>">
 
-  <!-- QRCode.js library -->
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <!-- QRCode.js library - using qrcodejs which is designed for browsers -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
   <style>
     *, *::before, *::after {
@@ -844,18 +844,38 @@
       `;
 
       try {
-        // Create temp canvas for QR code
-        const tempCanvas = document.createElement('canvas');
+        // Create temp div for QRCode.js (it needs a DOM element)
+        const tempDiv = document.createElement('div');
+        tempDiv.style.display = 'none';
+        document.body.appendChild(tempDiv);
 
-        await QRCode.toCanvas(tempCanvas, url, {
-          errorCorrectionLevel: 'H',
-          margin: 2,
+        // Generate QR code using qrcodejs library
+        const qr = new QRCode(tempDiv, {
+          text: url,
           width: 400,
-          color: {
-            dark: '#000000',
-            light: '#ffffff',
-          },
+          height: 400,
+          colorDark: '#000000',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.H,
         });
+
+        // Wait for QR code to be generated (it creates an img and canvas)
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Get the generated image
+        const qrImg = tempDiv.querySelector('img') || tempDiv.querySelector('canvas');
+
+        if (!qrImg) {
+          throw new Error('QR code generation failed');
+        }
+
+        // Wait for image to load if it's an img element
+        if (qrImg.tagName === 'IMG' && !qrImg.complete) {
+          await new Promise(resolve => {
+            qrImg.onload = resolve;
+            qrImg.onerror = resolve;
+          });
+        }
 
         // Draw to final canvas with emoji
         const ctx = qrCanvas.getContext('2d');
@@ -864,7 +884,10 @@
         qrCanvas.height = size;
 
         // Draw QR code
-        ctx.drawImage(tempCanvas, 0, 0, size, size);
+        ctx.drawImage(qrImg, 0, 0, size, size);
+
+        // Clean up temp div
+        document.body.removeChild(tempDiv);
 
         // Draw white circle background
         const centerX = size / 2;
