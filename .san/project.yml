@@ -1,0 +1,17 @@
+schemaVersion: 1
+id: qremoji
+name: qremoji.cc
+kind: webApplication
+summary: "the qr emoji generator web app at qremoji.cc."
+capabilities: []
+platforms: []
+repository:
+  canonicalRemotes:
+    - https://github.com/atlascodesai/qremoji.cc.git
+integrations:
+  copy: []
+  analytics:
+    provider: goatcounter
+    siteId: qremoji
+    publicDashboard: https://qremoji.goatcounter.com
+    searchConsole: pending
