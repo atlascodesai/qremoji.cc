@@ -12,6 +12,8 @@ integrations:
   copy: []
   analytics:
     provider: goatcounter
+    domain: qremoji.cc
+    searchConsoleProperty: sc-domain:qremoji.cc
     siteId: qremoji
     publicDashboard: https://qremoji.goatcounter.com
     searchConsole: pending
