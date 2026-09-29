@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check": "tsc --noEmit && eslint && next build"
   },
   "dependencies": {
     "@types/qrcode": "^1.5.6",
